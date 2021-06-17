@@ -1160,7 +1160,7 @@
 #define PROBING_MARGIN 10
 
 // X and Y axis travel speed (mm/min) between probes
-#define XY_PROBE_FEEDRATE (50*60)
+#define XY_PROBE_FEEDRATE (HOMING_FEEDRATE_XY * 2)
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
 #define Z_PROBE_FEEDRATE_FAST (4*60)
@@ -1609,7 +1609,7 @@
   //#define MESH_EDIT_GFX_OVERLAY   // Display a graphics overlay while editing the mesh
 
   #define MESH_INSET 10             // Set Mesh bounds as an inset region of the bed
-  #define GRID_MAX_POINTS_X 7       // Don't use more than 15 points per axis, implementation limited.
+  #define GRID_MAX_POINTS_X 9       // Don't use more than 15 points per axis, implementation limited.
   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
   //#define UBL_HILBERT_CURVE       // Use Hilbert distribution for less travel when probing multiple points
