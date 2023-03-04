@@ -2474,6 +2474,10 @@ bool Planner::_populate_block(
     accel = CEIL(settings.retract_acceleration * steps_per_mm);   // Convert to: acceleration steps/sec^2
   }
   else {
+    char buff1[255];
+//        sprintf(buff1, "Desired: %u, Count %u, Steps %u, Axis: %u, Index: %u, Max Acc: %u Max Poss: %u", accel, block->step_event_count, block->steps[AXIS], AXIS, INDX, max_acceleration_steps_per_s2[AXIS+INDX], max_possible); \
+//        SERIAL_ECHOLN(buff1); \
+
     #define LIMIT_ACCEL_LONG(AXIS,INDX) do{ \
       if (block->steps[AXIS] && max_acceleration_steps_per_s2[AXIS+INDX] < accel) { \
         const uint32_t max_possible = max_acceleration_steps_per_s2[AXIS+INDX] * block->step_event_count / block->steps[AXIS]; \
@@ -2548,6 +2552,11 @@ bool Planner::_populate_block(
   }
   block->acceleration_steps_per_s2 = accel;
   block->acceleration = accel / steps_per_mm;
+
+  char buff2[255];
+  sprintf(buff2, "Block Accel mm/s^2: %lu", accel);
+  SERIAL_ECHOLN(buff2);
+
   #if DISABLED(S_CURVE_ACCELERATION)
     block->acceleration_rate = (uint32_t)(accel * (float(1UL << 24) / (STEPPER_TIMER_RATE)));
   #endif
@@ -2868,6 +2877,11 @@ bool Planner::_populate_block(
     #endif
 
   #endif // Classic Jerk Limiting
+
+  char buff3[256];
+  dtostrf(block->max_entry_speed_sqr,3,2,buff3);
+  sprintf(buff1, "Desired: %u, Count %u, Steps %u, Axis: %u, Index: %u, Max Acc: %u Max Poss: %u", accel, block->step_event_count, block->steps[AXIS], AXIS, INDX, max_acceleration_steps_per_s2[AXIS+INDX], max_possible);
+  SERIAL_ECHOLN(buff1);
 
   // Max entry speed of this block equals the max exit speed of the previous block.
   block->max_entry_speed_sqr = vmax_junction_sqr;
