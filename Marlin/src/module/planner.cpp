@@ -1848,6 +1848,8 @@ bool Planner::_buffer_steps(const xyze_long_t &target
   // Recalculate and optimize trapezoidal speed profiles
   recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, hints.safe_exit_speed_sqr));
 
+  block->debug_print();
+
   // Movement successfully queued!
   return true;
 }
@@ -2912,7 +2914,7 @@ bool Planner::_populate_block(
   TERN_(GRADIENT_MIX, mixer.gradient_control(target_float.z));
 
   block->debug_print();
-
+  
   return true;        // Movement was accepted
 
 } // _populate_block()
