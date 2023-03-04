@@ -2474,7 +2474,7 @@ bool Planner::_populate_block(
     accel = CEIL(settings.retract_acceleration * steps_per_mm);   // Convert to: acceleration steps/sec^2
   }
   else {
-    char buff1[255];
+//    char buff1[255];
 //        sprintf(buff1, "Desired: %u, Count %u, Steps %u, Axis: %u, Index: %u, Max Acc: %u Max Poss: %u", accel, block->step_event_count, block->steps[AXIS], AXIS, INDX, max_acceleration_steps_per_s2[AXIS+INDX], max_possible); \
 //        SERIAL_ECHOLN(buff1); \
 
@@ -2911,43 +2911,7 @@ bool Planner::_populate_block(
   TERN_(HAS_POSITION_FLOAT, position_float = target_float);
   TERN_(GRADIENT_MIX, mixer.gradient_control(target_float.z));
 
-  // Debug plock contents
-  {
-    char msg[256];
-    dtostrf(block->max_entry_speed_sqr, 3, 2, msg);
-    sprintf(msg, "
-      nominal_speed: %s, 
-      entry_speed_sqr: %s, 
-      max_entry_speed_sqr: %s, 
-      millimeters: %s, 
-      acceleration: %s, 
-      Count %u, Steps %u, Axis: %u, Index: %u, Max Acc: %u Max Poss: %u", accel, block->step_event_count, block->steps[AXIS], AXIS, INDX, max_acceleration_steps_per_s2[AXIS+INDX], max_possible);
-    SERIAL_ECHOLN(msg);
-    
-    // Fields used by the motion planner to manage acceleration
-    float nominal_speed,                      // The nominal speed for this block in (mm/sec)
-          entry_speed_sqr,                    // Entry speed at previous-current junction in (mm/sec)^2
-          max_entry_speed_sqr,                // Maximum allowable junction entry speed in (mm/sec)^2
-          millimeters,                        // The total travel of this block in mm
-          acceleration;                       // acceleration mm/sec^2
-
-    uint32_t step_event_count;                // The number of step events required to complete this block
-
-    // Settings for the trapezoid generator
-    uint32_t accelerate_until,                // The index of the step event on which to stop acceleration
-            decelerate_after;                // The index of the step event on which to start decelerating
-
-    uint32_t acceleration_rate;             // The acceleration rate used for acceleration calculation
-
-    uint32_t nominal_rate,                    // The nominal step rate for this block in step_events/sec
-            initial_rate,                    // The jerk-adjusted step rate at start of block
-            final_rate,                      // The minimal rate at exit
-            acceleration_steps_per_s2;       // acceleration steps/sec^2
-
-    #if HAS_WIRED_LCD
-      uint32_t segment_time_us;
-    #endif
-  }
+  block->debug_print();
 
   return true;        // Movement was accepted
 

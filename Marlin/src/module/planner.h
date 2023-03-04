@@ -291,6 +291,69 @@ typedef struct PlannerBlock {
 
   void reset() { memset((char*)this, 0, sizeof(*this)); }
 
+  private:
+  int sprintf_float(char* out, const char* fmt, float val)
+  {
+    char buff[256];
+    dtostrf(val, 3, 2, buff);
+    return sprintf(out, fmt, buff);
+  }
+
+  public:
+  void debug_print()
+  {
+    char msg[1024];
+    char *ptr = msg;
+    ptr += sprintf_float(ptr, "nominal_speed: %s, ", this->nominal_speed);
+    ptr += sprintf_float(ptr, "entry_speed_sqr: %s, ", this->entry_speed_sqr);
+    ptr += sprintf_float(ptr, "max_entry_speed_sqr: %s, ", this->max_entry_speed_sqr);
+    ptr += sprintf_float(ptr, "millimeters: %s, ", this->millimeters);
+    ptr += sprintf_float(ptr, "acceleration: %s, ", this->acceleration);
+    
+    ptr += sprintf(ptr, "step_event_count: %lu, ", this->step_event_count);
+    ptr += sprintf(ptr, "accelerate_until: %lu, ", this->accelerate_until);
+
+    ptr += sprintf(ptr, "decelerate_after: %lu, ", this->decelerate_after);
+
+    ptr += sprintf(ptr, "acceleration_rate: %lu, ", this->acceleration_rate);
+
+    ptr += sprintf(ptr, "nominal_rate: %lu, ", this->nominal_rate);
+    ptr += sprintf(ptr, "initial_rate: %lu, ", this->initial_rate);
+    ptr += sprintf(ptr, "final_rate: %lu, ", this->final_rate);
+    ptr += sprintf(ptr, "acceleration_steps_per_s2: %lu, ", this->acceleration_steps_per_s2);
+
+    #if HAS_WIRED_LCD
+      ptr += sprintf(ptr, "segment_time_us: %lu, ", this->segment_time_us);
+    #endif
+
+    SERIAL_ECHOLN(msg);
+    
+#if 0
+    // Fields used by the motion planner to manage acceleration
+    float nominal_speed,                      // The nominal speed for this block in (mm/sec)
+          entry_speed_sqr,                    // Entry speed at previous-current junction in (mm/sec)^2
+          max_entry_speed_sqr,                // Maximum allowable junction entry speed in (mm/sec)^2
+          millimeters,                        // The total travel of this block in mm
+          acceleration;                       // acceleration mm/sec^2
+
+    uint32_t step_event_count;                // The number of step events required to complete this block
+
+    // Settings for the trapezoid generator
+    uint32_t accelerate_until,                // The index of the step event on which to stop acceleration
+            decelerate_after;                // The index of the step event on which to start decelerating
+
+    uint32_t acceleration_rate;             // The acceleration rate used for acceleration calculation
+
+    uint32_t nominal_rate,                    // The nominal step rate for this block in step_events/sec
+            initial_rate,                    // The jerk-adjusted step rate at start of block
+            final_rate,                      // The minimal rate at exit
+            acceleration_steps_per_s2;       // acceleration steps/sec^2
+
+    #if HAS_WIRED_LCD
+      uint32_t segment_time_us;
+    #endif
+#endif
+  }
 } block_t;
 
 #if ANY(LIN_ADVANCE, FEEDRATE_SCALING, GRADIENT_MIX, LCD_SHOW_E_TOTAL, POWER_LOSS_RECOVERY)
