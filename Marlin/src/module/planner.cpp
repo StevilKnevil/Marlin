@@ -2316,6 +2316,46 @@ bool Planner::_populate_block(
         #endif
       }
     }
+    #if ENABLED(THERMAL_SLOWDOWN)
+    // If we are slowing due to buffer underrun above, then assume we don't need to slow further.
+    else {
+      // If the current temperature is significantly different to desired temperature, then slow the print to allow the nozzle to heat
+      const celsius_t curr_temp = thermalManager.wholeDegHotend(active_extruder);
+      const celsius_t target_temp = thermalManager.degTargetHotend(active_extruder);
+      const celsius_t tolerance = 1;
+      const celsius_t half_speed_temperature_diff = 5;
+      if (curr_temp < target_temp - 1)
+      {
+        /* Slow down the print to try and allow the hot end to come back up to temperature
+          Speed                                 
+                  ^           -------------         
+                  |          /|                     
+             100% ----------- |                     
+                  |        /| |                     
+                  |       / | |                     
+                  |      /  | |                     
+              50% -------   | |                     
+                  |    /|   | |                     
+                  |---/-|---|-|--------> Nozzle Temp
+                        |===|=|
+                          |  | \
+                          |  |  Target Temp                      
+                          |  |
+                          | Cutoff temp diff
+                          |                         
+                  Half speed temp diff             
+        */
+        const int32_t hi_timeseg = segment_time_us;
+        const celsius_t hi_temp = target_temp - half_speed_temperature_diff;
+
+        const int32_t lo_timeseg = segment_time_us * 2;
+        const celsius_t lo_temp = hi_temp - half_speed_temperature_diff;
+
+        // Linearly interpolate:
+        segment_time_us = (lo_timeseg*(hi_temp-curr_temp) + hi_timeseg*(curr_temp - lo_temp)) / (hi_temp - curr_temp);
+      }
+    }
+    #endif // ENABLED(THERMAL_SLOWDOWN)
   #endif
 
   #if HAS_WIRED_LCD

@@ -1054,6 +1054,9 @@
 #define SLOWDOWN
 #if ENABLED(SLOWDOWN)
   #define SLOWDOWN_DIVISOR 2
+  // Slow down the print if the hot end deviates from the target temperature too much
+  // Compensates for printing large areas quicklye where the cold filament cooles the nozzle faster than the heater can heat it
+  #define THERMAL_SLOWDOWN
 #endif
 
 /**
