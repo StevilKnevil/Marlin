@@ -2316,15 +2316,21 @@ bool Planner::_populate_block(
         #endif
       }
     }
-    #if ENABLED(THERMAL_SLOWDOWN)
-    // If we are slowing due to buffer underrun above, then assume we don't need to slow further.
-    else {
+    #if BOTH(HAS_EXTRUDERS, THERMAL_SLOWDOWN)
+    // If this block has extruder motion (i.e. it's not a travel move) then slow down if the hotend is cooling too much due to extrusion
+    else if (block->steps.e != 0){
       // If the current temperature is significantly different to desired temperature, then slow the print to allow the nozzle to heat
       const celsius_t curr_temp = thermalManager.wholeDegHotend(active_extruder);
       const celsius_t target_temp = thermalManager.degTargetHotend(active_extruder);
       const celsius_t tolerance = 1;
       const celsius_t half_speed_temperature_diff = 5;
-      if (curr_temp < target_temp - 1)
+
+      // Interpolate Z based on a temperature being within a given range
+      auto linear_interp = [](const_float_t v0, const_float_t v1, const_float_t t) {
+        return v0 + t * (v1 - v0);
+      };  
+
+      if (curr_temp < target_temp - tolerance)
       {
         /* Slow down the print to try and allow the hot end to come back up to temperature
           Speed                                 
@@ -2345,14 +2351,30 @@ bool Planner::_populate_block(
                           |                         
                   Half speed temp diff             
         */
-        const int32_t hi_timeseg = segment_time_us;
-        const celsius_t hi_temp = target_temp - half_speed_temperature_diff;
+        const float hi_scale_factor = 1.0f;
+        const celsius_t hi_temp = target_temp - tolerance;
 
-        const int32_t lo_timeseg = segment_time_us * 2;
+        const float lo_scale_factor = 0.5f;
         const celsius_t lo_temp = hi_temp - half_speed_temperature_diff;
 
+        SERIAL_ECHOLNPGM("Initial Seg Time: ", segment_time_us);
+        SERIAL_ECHOLNPGM("Initial Inv Time: ", inverse_secs);
+        SERIAL_ECHOLNPGM("target_temp: ", target_temp);
+        SERIAL_ECHOLNPGM("curr_temp: ", curr_temp);
+
         // Linearly interpolate:
-        segment_time_us = (lo_timeseg*(hi_temp-curr_temp) + hi_timeseg*(curr_temp - lo_temp)) / (hi_temp - curr_temp);
+        //float scale_factor = (lo_scale_factor * (hi_temp-curr_temp) + hi_scale_factor * (curr_temp-lo_temp)) / (hi_temp - curr_temp);
+        float alpha = ((float)(curr_temp-lo_temp))/(hi_temp-lo_temp);
+        float scale_factor = linear_interp(lo_scale_factor, hi_scale_factor, alpha);
+        SERIAL_ECHOLNPGM("alpha: ", alpha);
+        SERIAL_ECHOLNPGM("scale_factor: ", scale_factor);
+
+        scale_factor = max(scale_factor, lo_scale_factor);
+        scale_factor = min(scale_factor, hi_scale_factor);
+        segment_time_us /= scale_factor;
+        inverse_secs *= scale_factor;
+        SERIAL_ECHOLNPGM("Final Seg Time: ", segment_time_us);
+        SERIAL_ECHOLNPGM("Final Inv Time: ", inverse_secs);
       }
     }
     #endif // ENABLED(THERMAL_SLOWDOWN)
