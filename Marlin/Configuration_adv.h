@@ -1204,7 +1204,7 @@
  */
 #define INPUT_SHAPING_X // Stevil Knevil
 #define INPUT_SHAPING_Y // Stevil Knevil
-#if EITHER(INPUT_SHAPING_X, INPUT_SHAPING_Y)
+#if ANY(INPUT_SHAPING_X, INPUT_SHAPING_Y)
   #if ENABLED(INPUT_SHAPING_X)
     #define SHAPING_FREQ_X  47.39       // (Hz) The default dominant resonant frequency on the X axis. // Stevil Knevil
     #define SHAPING_ZETA_X  0.15f       // Damping ratio of the X axis (range: 0.0 = no damping to 1.0 = critical damping).
