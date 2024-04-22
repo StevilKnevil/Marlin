@@ -681,8 +681,8 @@
  * PIDTEMP : PID temperature control (~4.1K)
  * MPCTEMP : Predictive Model temperature control. (~1.8K without auto-tune)
  */
-#define PIDTEMP           // See the PID Tuning Guide at https://reprap.org/wiki/PID_Tuning
-//#define MPCTEMP         // ** EXPERIMENTAL ** See https://marlinfw.org/docs/features/model_predictive_control.html
+//#define PIDTEMP           // See the PID Tuning Guide at https://reprap.org/wiki/PID_Tuning // Stevil Knevil
+#define MPCTEMP         // ** EXPERIMENTAL ** See https://marlinfw.org/docs/features/model_predictive_control.html // Stevil Knevil
 
 #define PID_MAX  255      // Limit hotend current while PID is active (see PID_FUNCTIONAL_RANGE below); 255=full current
 #define PID_K1     0.95   // Smoothing factor within any PID loop
@@ -700,9 +700,9 @@
     #define DEFAULT_Ki_LIST {   2.26,   2.26 }
     #define DEFAULT_Kd_LIST {  83.64,  83.64 }
   #else
-    #define DEFAULT_Kp  27.51
-    #define DEFAULT_Ki   2.26
-    #define DEFAULT_Kd  83.64
+    #define DEFAULT_Kp  47 // Stevil Knevil
+    #define DEFAULT_Ki  6.5 // Stevil Knevil
+    #define DEFAULT_Kd  83 // Stevil Knevil
   #endif
 #else
   #define BANG_MAX 255    // Limit hotend current while in bang-bang mode; 255=full current
@@ -722,7 +722,7 @@
   //#define MPC_AUTOTUNE_MENU                         // Add MPC auto-tuning to the "Advanced Settings" menu. (~350 bytes of flash)
 
   #define MPC_MAX 255                                 // (0..255) Current to nozzle while MPC is active.
-  #define MPC_HEATER_POWER { 40.0f }                  // (W) Heat cartridge powers.
+  #define MPC_HEATER_POWER { 30.0f }                  // (W) Heat cartridge powers. // Stevil Knevil
 
   #define MPC_INCLUDE_FAN                             // Model the fan speed?
 
