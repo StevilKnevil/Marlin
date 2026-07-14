@@ -2,7 +2,12 @@
 
 This documents the process for updating to a new Marlin release and carrying forward custom changes.
 
-Assumtion in this doc: Taking the changes from `lts-2.1.1` and applying them to `lts-2.1.2.8`
+Branch/tag structure per version:
+- `lts-2.1.2.8-ender3` — upstream release + Ender 3 config files applied (the base branch)
+- `lts-2.1.2.8-custom` — branched from above, with customisations
+- `customisations/lts-2.1.2.8` **tag** — marks the customisation commit on the custom branch (before firmware/docs commits)
+
+Patch generation for the next update, from the previous base Ender3 version to the last of the customisation commmits: `git diff lts-2.1.2.8-ender3 customisations/lts-2.1.2.8`
 
 ---
 
@@ -14,11 +19,11 @@ If `upstream` is not yet configured, add it:
 git remote add upstream https://github.com/MarlinFirmware/Marlin.git
 ```
 
-Fetch all refs and tags from `upstream` (the official MarlinFirmware/Marlin remote), then create a new local branch at the release tag (e.g. `lts-2.1.2.8`):
+Fetch all refs and tags from `upstream` (the official MarlinFirmware/Marlin remote), then create the Ender 3 base branch at the release tag (e.g. `lts-2.1.2.8`):
 
 ```powershell
 git fetch upstream --tags
-git checkout -b lts-2.1.2.8-custom lts-2.1.2.8
+git checkout -b lts-2.1.2.8-ender3 lts-2.1.2.8
 ```
 
 ---
@@ -36,31 +41,41 @@ Marlin/_Bootscreen.h
 Marlin/_Statusscreen.h
 ```
 
-Stage and commit them as a baseline, then tag that commit as the stock config anchor:
+Stage, commit, and push the base branch:
 
 ```powershell
 git add Marlin/Configuration.h Marlin/Configuration_adv.h Marlin/_Bootscreen.h Marlin/_Statusscreen.h
-git commit -m "Apply stock config files for <version>"
-git tag lts-2.1.2.8-base
+git commit -m "Apply Ender 3 config files for <version>"
+git push origin lts-2.1.2.8-ender3
 ```
 
 ---
 
-## 3. Generate a patch of changes from the previous branch
+## 3. Generate a patch of changes from the previous version
 
-Both ends of the previous customisation are tagged — the stock config baseline (`lts-2.1.1-Ender3Config`) and the final tested state (`lts-2.1.1-Customisations`). Generate the patch as a diff between them:
+The previous version's customisations are captured between its ender3 base branch and its customisations tag. Generate the patch:
 
 ```powershell
-git diff lts-2.1.1-Ender3Config lts-2.1.1-Customisations > customisations.patch
+git diff lts-2.1.1-ender3 customisations/lts-2.1.1 > customisations.patch
 ```
 
-This captures all commits made during customisation and testing, and is applied to the new branch in the next step.
+This captures all customisation commits, excluding any subsequent firmware/docs commits on the previous branch.
 
 ---
 
-## 4. Apply the patch (3-way merge)
+## 4. Create the custom branch
 
-Apply the patch to the new branch using 3-way merge so conflicts are marked rather than causing the apply to abort:
+Branch off from the new ender3 base:
+
+```powershell
+git checkout -b lts-2.1.2.8-custom lts-2.1.2.8-ender3
+```
+
+---
+
+## 5. Apply the patch (3-way merge)
+
+Apply the patch to the new custom branch using 3-way merge so conflicts are marked rather than causing the apply to abort:
 
 ```powershell
 git apply --3way customisations.patch
@@ -68,13 +83,13 @@ git apply --3way customisations.patch
 
 ---
 
-## 5. Resolve conflicts
+## 6. Resolve conflicts
 
 If `git apply --3way` produces conflicts, resolve them manually in the affected files.
 
 ---
 
-## 6. Build, test and commit
+## 7. Build, test and commit
 
 Build the firmware using PlatformIO (via Auto Build Marlin or the CLI):
 
@@ -82,32 +97,24 @@ Build the firmware using PlatformIO (via Auto Build Marlin or the CLI):
 pio run
 ```
 
-Verify the firmware behaves correctly on hardware, then commit:
+Verify the firmware behaves correctly on hardware, then commit and tag the customisation commit:
 
 ```powershell
 git add -u
 git commit -m "Customised <version> — built and tested"
+git tag customisations/lts-2.1.2.8
 ```
 
-Tag the final tested state so both ends are labelled for next time:
-
-```powershell
-git tag lts-2.1.2.8-custom
-```
-
-The stock config anchor (`lts-2.1.2.8-base`) was tagged in step 2. Together these two tags are all that is needed to regenerate the patch in a future update.
-
-Push the branch and both tags to origin:
+Push the branch and tag to origin:
 
 ```powershell
 git push origin lts-2.1.2.8-custom
-git push origin refs/tags/lts-2.1.2.8-base
-git push origin refs/tags/lts-2.1.2.8-custom
+git push origin customisations/lts-2.1.2.8
 ```
 
 ---
 
-## 7. Archive the built firmware
+## 8. Archive the built firmware
 
 Copy the compiled firmware from the PlatformIO build output into the `firmware/` folder with a date-stamped name:
 
@@ -116,7 +123,7 @@ $date = Get-Date -Format "yyyyMMdd-HHmmss"
 Copy-Item "Marlin\.pio\build\STM32F103RC_creality\firmware.bin" "firmware\firmware-$date.bin"
 ```
 
-Commit the archived firmware:
+Commit and push:
 
 ```powershell
 git add firmware/
