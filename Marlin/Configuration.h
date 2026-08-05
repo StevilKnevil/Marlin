@@ -1218,7 +1218,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 10000, 2500, 100, 5000 } // Stevil Knevil
+#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 100, 5000 } // Stevil Knevil
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1233,9 +1233,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION                  1000  // X, Y, Z ... and E acceleration for printing moves // Stevil Knevil
-#define DEFAULT_RETRACT_ACCELERATION          1000  // E acceleration for retracts // Stevil Knevil
-#define DEFAULT_TRAVEL_ACCELERATION          15000  // X, Y, Z ... acceleration for travel (non printing) moves // Stevil Knevil
+#define DEFAULT_ACCELERATION                  500  // X, Y, Z ... and E acceleration for printing moves // Stevil Knevil
+#define DEFAULT_RETRACT_ACCELERATION          500  // E acceleration for retracts // Stevil Knevil
+#define DEFAULT_TRAVEL_ACCELERATION          2000  // X, Y, Z ... acceleration for travel (non printing) moves // Stevil Knevil
 
 
 /**
@@ -1514,7 +1514,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -48, -10, -1.70 } // Stevil Knevil
+#define NOZZLE_TO_PROBE_OFFSET { -48, -10, -0.80 } // Stevil Knevil
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
