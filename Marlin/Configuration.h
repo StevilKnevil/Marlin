@@ -1734,7 +1734,7 @@
 #define X_MIN_POS 0
 #define Y_MIN_POS -15 // Stevil Knevil
 #define Z_MIN_POS 0
-#define X_MAX_POS 249 // Stevil Knevil
+#define X_MAX_POS 240 // Stevil Knevil
 #define Y_MAX_POS 232 // Stevil Knevil
 #define Z_MAX_POS 250
 //#define I_MIN_POS 0
